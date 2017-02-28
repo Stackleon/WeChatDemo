@@ -12,7 +12,7 @@ var config = {
         appSecret:"303a4d6b7216d11e1ce872581edc2e83",
         token:"b73325a6cd970bad4c26ab3a38bc2807",
         getAccessToken:function(){
-            console.log('file path:'+wechat_file);
+            //console.log('file path:'+wechat_file);
             return util.readFileSync(wechat_file,'utf-8');
         },
         saveAccessToken:function(data){
