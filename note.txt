@@ -1,0 +1,18 @@
+day01:
+
+使用ngrok进行内网的映射
+因为www.tunnel.mobi网站没法访问 
+使用www.ngrok.cc使用国内的一个内外网映射
+        进去选择  隧道管理->开通隧道
+        https://www.ngrok.cc/#down-client这个网站下载sunny-ngrok
+        ./sunny  clinetid  隧道id   使用隧道代理
+
+微信公众号后台接入：
+    app.use(genenrtor);
+    koa下面有个参数query里面储存这个url出过来的值
+
+
+
+
+
+
