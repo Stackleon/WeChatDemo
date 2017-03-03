@@ -34,8 +34,8 @@ var tpl = heredoc(function(){
             <HQMusicUrl><![CDATA[<%= content.hqMusicUrl %>]]></HQMusicUrl>
             <ThumbMediaId><![CDATA[<%= content.thumbMediaId %>]]></ThumbMediaId>
             </Music>
-        <% } else if(msgType === 'music') { %>
-            <ArticleCount><% content.length %></ArticleCount>
+        <% } else if(msgType === 'news') { %>
+            <ArticleCount><%= content.length %></ArticleCount>
             <Articles>
             <% content.forEach(function(item) { %>
                 <item>

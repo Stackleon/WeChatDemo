@@ -9,7 +9,7 @@ module.exports = function(opts,handler){
     var wechat = new WeChat(opts);
 
     return function*(next){
-        console.log(this);
+        //console.log(this);
         var that = this;
         var token = opts.token;
         var signature = this.query.signature;
