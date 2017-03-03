@@ -1,13 +1,14 @@
 'use strict'
 var Promise = require('bluebird')
 var request = Promise.promisify(require('request'));
+var util = require('./util');
 //var request = require('request');
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
 var api = {
     access_token :prefix+ 'token?grant_type=client_credential'
 }
-
+//主要用于票据的检查和更新
 function WeChat(opts){
 
     //票据的读出，写入
@@ -27,14 +28,15 @@ function WeChat(opts){
         }
 
         if(that.isValidAccessToken(data)){
-            Promise.resolve(data);
+            return Promise.resolve(data);
         } else {
+            console.log('1');
             return that.updateAccessToken(data);
         }
-
+        console('2');
     })
     .then(function(data){
-        //console.log("4");
+        console.log("4");
         that.access_token = data.access_token;
         that.expires_in = data.expires_in;
         that.saveAccessToken(data);
@@ -43,6 +45,7 @@ function WeChat(opts){
 
 
 WeChat.prototype.isValidAccessToken = function(data){
+        console.log('---');
         if(!data || !data.access_token || !data.expires_in){
             return false;
         }
@@ -51,6 +54,7 @@ WeChat.prototype.isValidAccessToken = function(data){
         var expires_in = data.expires_in;
         var now = (new Date().getTime());
 
+        console.log('expires_in:'+expires_in+'   now:'+now);
         if(now < expires_in){
             return true;
         }else {
@@ -64,7 +68,7 @@ WeChat.prototype.updateAccessToken = function(){
         var url = api.access_token+'&appid='+appID+'&secret='+appSecret;
         //console.log("url:"+url);
         return new Promise(function(resolve,reject){
-                  
+                  console.log('3');
                  request(url,function(err,response,body){
                     var data = JSON.parse(body);
                     var now = (new Date().getTime());
@@ -75,5 +79,17 @@ WeChat.prototype.updateAccessToken = function(){
         });
 }
 
+
+WeChat.prototype.reply = function(){
+    var content = this.body;
+    var message = this.weixin;
+
+    var xml = util.tpl(content,message);
+
+    console.log("xml:"+xml);
+    this.body = xml;
+    this.status = 200;
+    this.type = 'application/xml';
+}
 
 module.exports = WeChat;

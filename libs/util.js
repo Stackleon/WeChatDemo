@@ -3,10 +3,11 @@ var fs = require('fs');
 exports.readFileSync = function(path,encoding){
    return new Promise(function(resolve,reject){
         fs.readFile(path,encoding,function(err,content){
+            //console.log('err:'+err+'  content:'+content);
             if(err){
                 reject(err);
             } else{
-                resolve(err);
+                resolve(content);
             }
         })
     });

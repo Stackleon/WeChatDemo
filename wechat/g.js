@@ -4,7 +4,7 @@ var getRawBody = require('raw-body');
 var util = require('./util');
 var xml2json = require('xml2json');
 
-module.exports = function(opts){
+module.exports = function(opts,handler){
    
     var wechat = new WeChat(opts);
 
@@ -45,24 +45,15 @@ module.exports = function(opts){
             var message = yield util.parseXMLAsync(data);
 
             console.log('message:'+message.xml.MsgType);
+            
+            this.weixin = message.xml;
 
-            if(message.xml.MsgType === 'event'){
-                if(message.xml.Event === 'subscribe'){
-                    var msg = "Hello Thank to your subcribe";
-                    that.status = 200;
-                    that.type = 'application/xml';
-                    that.body = retryMsg(message,msg);
-                    return;
-                }
-            } else if(message.xml.MsgType === 'text'){
-                var text = 'Hello from Node.js';
-                that.status = 200;
-                that.type = 'application/xml';
-                that.body = retryMsg(message,text);
-                console.log("body:"+that.body);
-                return;
-            }
+            //根据用户的消息类型来进行回复
+            yield handler.call(this,next);
 
+            //请求相应的逻辑还会回到这里
+            
+            wechat.reply.call(this);
         }
   }
 }
@@ -79,3 +70,27 @@ function retryMsg(message,text){
                     </xml>`;
     return retrymsg;
 }
+
+
+
+/*
+if(message.xml.MsgType === 'event'){
+                if(message.xml.Event === 'subscribe'){
+                    var msg = "Hello Thank to your subcribe";
+                    that.status = 200;
+                    that.type = 'application/xml';
+                    that.body = retryMsg(message,msg);
+                    return;
+                }
+            } else if(message.xml.MsgType === 'text'){
+                var text = 'Hello from Node.js';
+                that.status = 200;
+                that.type = 'application/xml';
+                that.body = retryMsg(message,text);
+                console.log("body:"+that.body);
+                return;
+            }
+
+
+
+*/
