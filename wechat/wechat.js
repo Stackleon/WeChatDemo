@@ -1,8 +1,8 @@
 'use strict'
-var Promise = require('bluebird')
-var request = Promise.promisify(require('request'));
+//var Promise = require('bluebird')
+//var request = Promise.promisify(require('request'));
 var util = require('./util');
-//var request = require('request');
+var request = require('request-promise');
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
 
 var api = {
@@ -83,7 +83,9 @@ WeChat.prototype.updateAccessToken = function(){
         //console.log("url:"+url);
         return new Promise(function(resolve,reject){
                   console.log('3');
-                 request(url,function(err,response,body){
+                 request(url)
+                 .then(function(body){
+                     console.log('body:'+body);
                     var data = JSON.parse(body);
                     var now = (new Date().getTime());
                     var expires_in = now +(data.expires_in-20)*1000;
