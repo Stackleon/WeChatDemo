@@ -17,9 +17,15 @@ function WeChat(opts){
     this.appSecret = opts.appSecret;
     this.getAccessToken = opts.getAccessToken;
     this.saveAccessToken = opts.saveAccessToken;
+    this.isValid = true;
+
+    this.fetchAccessToken();
+}
 
 
-    this.getAccessToken()
+WeChat.prototype.fetchAccessToken = function(){
+     var that = this;
+     this.getAccessToken()
     .then(function(data){
         try{
            data = JSON.parse(data);
@@ -33,15 +39,22 @@ function WeChat(opts){
             console.log('1');
             return that.updateAccessToken(data);
         }
-        console('2');
     })
     .then(function(data){
-        console.log("4");
-        that.access_token = data.access_token;
-        that.expires_in = data.expires_in;
-        that.saveAccessToken(data);
+        console.log(that.isValid);
+        if(that.isValid){
+            console.log('valid');
+            return Promise.resolve(data);
+        } else {
+            console.log("not valid");
+            that.access_token = data.access_token;
+            that.expires_in = data.expires_in;
+            return that.saveAccessToken(data);
+        }
     })
 }
+
+
 
 
 WeChat.prototype.isValidAccessToken = function(data){
@@ -63,6 +76,7 @@ WeChat.prototype.isValidAccessToken = function(data){
 }
 
 WeChat.prototype.updateAccessToken = function(){
+        this.isValid = false;  //当更新后才进行重新写入文件
         var appID = this.appID;
         var appSecret = this.appSecret;
         var url = api.access_token+'&appid='+appID+'&secret='+appSecret;

@@ -19,7 +19,7 @@ exports.writeFileSync = function(path,content){
             if(err){
                 reject(err);
             }else{
-                resolve();
+                resolve(content);
             }
         });
     });
