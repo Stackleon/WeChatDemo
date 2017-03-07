@@ -1,5 +1,7 @@
 'use strict'
-
+var WeChat = require('./wechat/wechat');
+var config = require('./config');
+var path = require('path');
 
 exports.reply = function* (next){
     var message = this.weixin; // 挂载过的对象
@@ -21,7 +23,33 @@ exports.reply = function* (next){
         }
 
     } else if(message.MsgType === 'text'){
-        this.body = replyMessageByNum(message.Content);
+            var wechatApi = new WeChat(config.wechat);
+            var sendMsg = message.Content;
+            var content = {};
+            console.log('sendMsg:'+sendMsg);
+            if(sendMsg === '1'){
+                    content = 'Hello，Guys。 you are very beauty!';
+            }else if(sendMsg === '2'){
+                    content = `    回复1：小惊喜
+            回复2：大惊喜
+            回复3：超大惊喜
+            回复4：试试你就知道了`;;
+            }else if(sendMsg === '3'){
+                    content = [
+                        {title:'技术改变生活',
+                        description :'拥抱开源',
+                        picUrl:'http://static.oschina.net/uploads/img/201304/17033907_yA2V.jpg',
+                        url:'https://www.github.com'
+                        }
+                    ]   
+            } else if(sendMsg === '4') {
+                var filePath = path.dirname(__dirname)+'/WeChat/material/milkyway.jpg'
+                var upload = yield wechatApi.uploadMaterial(filePath,'image')
+                content.mediaId = upload.media_id;
+                content.type = 'image';
+            }
+
+            this.body = content;
     }
 }
 

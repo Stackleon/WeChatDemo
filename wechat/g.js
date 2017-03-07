@@ -9,7 +9,7 @@ module.exports = function(opts,handler){
     var wechat = new WeChat(opts);
 
     return function*(next){
-        //console.log(this);
+        console.log(this);
         var that = this;
         var token = opts.token;
         var signature = this.query.signature;
@@ -33,8 +33,8 @@ module.exports = function(opts,handler){
                 this.body = 'wrong';
                 return false;
             }
-            //TODO  这个yield
-            //这个地方要用req，因为POST中过来的对象中用的是req
+            // TODO  这个yield
+            // 这个地方要用req，因为POST中过来的对象中用的是req
 
             var data = yield getRawBody(this.req,{
                 length:this.length,
