@@ -47,6 +47,13 @@ exports.reply = function* (next){
                 var upload = yield wechatApi.uploadMaterial(filePath,'image')
                 content.mediaId = upload.media_id;
                 content.type = 'image';
+            } else if(sendMsg === '5') {
+                var filePath = path.dirname(__dirname)+'/WeChat/material/funny.mp4';
+                var uploadVideo = yield wechatApi.uploadMaterial(filePath,'video');
+                content.mediaId = uploadVideo.media_id;
+                content.title = "搞笑视频";
+                content.description = '亲，这是个搞笑视频';
+                content.type = 'video';
             }
 
             this.body = content;
