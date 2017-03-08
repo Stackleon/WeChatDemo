@@ -54,7 +54,25 @@ exports.reply = function* (next){
                 content.title = "搞笑视频";
                 content.description = '亲，这是个搞笑视频';
                 content.type = 'video';
+            } else if( sendMsg === '6') {
+                var filePath = path.dirname(__dirname)+'/WeChat/material/milkyway.jpg'
+                var upload = yield wechatApi.uploadMaterial(filePath,'image',{type:'image'});
+                content = [
+                        {title:'技术改变生活',
+                        description :'拥抱开源',
+                        picUrl:upload.url,
+                        url:'https://www.github.com'
+                        }
+                    ]  
+            } else if( sendMsg === '7') {
+                var form = {
+                    type :'image',
+                    offset : 0,
+                    count : 1,
+                }
+                yield wechatApi.getMaterialList(form);
             }
+            
 
             this.body = content;
     }

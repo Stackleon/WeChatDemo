@@ -6,11 +6,33 @@ var util = require('./util');
 var request = require('request-promise');
 var prefix = 'https://api.weixin.qq.com/cgi-bin/';
 var fs = require('fs');
+var _ = require('lodash');
+
+/*
+新增图文
+https://api.weixin.qq.com/cgi-bin/material/add_news?access_token=ACCESS_TOKEN
+
+新增图片
+https://api.weixin.qq.com/cgi-bin/media/uploadimg?access_token=ACCESS_TOKEN
+
+新增其他类型永久素材
+https://api.weixin.qq.com/cgi-bin/material/add_material?access_token=ACCESS_TOKEN&type=TYPE
+
+获取永久素材列表
+https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=ACCESS_TOKEN
+*/
 
 var api = {
     access_token :prefix+ 'token?grant_type=client_credential',
     temp_material:{
         upload : prefix+'media/upload?',
+    },
+    permanent_material:{
+        upload_news : prefix + 'material/add_news?',
+        upload_img : prefix + 'media/uploadimg?',
+        upload_material : prefix + 'material/add_material?',
+        getMaterialList : prefix + 'material/batchget_material?',
+
     }
 }
 //主要用于票据的检查和更新
@@ -26,8 +48,7 @@ function WeChat(opts){
 
     this.fetchAccessToken();
 }
-
-
+ 
 WeChat.prototype.fetchAccessToken = function(){
      var that = this;
      return new Promise(function(resolve,reject){
@@ -96,26 +117,90 @@ WeChat.prototype.updateAccessToken = function(){
         });
 }
 
-WeChat.prototype.uploadMaterial = function(uploadFilePath,type){
+WeChat.prototype.uploadMaterial = function(material,type,permanent){
     console.log('uploadMaterial');
         var that = this;
-        var form ={
-            media:fs.createReadStream(uploadFilePath)
-        };
+        var uploadUrl = api.temp_material.upload;
+        var form = {};
+        if(permanent){
+            uploadUrl = api.permanent_material.upload;
+            _.extend(form,permanent);
+
+            if(type === 'image') {
+                uploadUrl = api.permanent_material.upload_img;
+                form.media = fs.createReadStream(material);
+            } else if(type === 'news'){
+                uploadUrl = api.permanent_material.upload_news;
+                form = material;
+            }
+        } else {
+            form.media = fs.createReadStream(material);
+        }
+
         return new Promise(function(resolve,reject){
                     console.log('getData');
                     that.fetchAccessToken()
                     .then(function(data){
                         //access_token=ACCESS_TOKEN&type=TYPE
-                        var url = api.temp_material.upload+"access_token="+data.access_token+"&type="+type;
-                        request({method:'POST',url:url,formData:form,json:true})
+                        var url = uploadUrl+"access_token="+data.access_token;
+                        if(!permanent){
+                            url = url + '&type='+type;
+                        } else {
+                            form.access_token = data.access_token;
+                        }
+
+                        var options = {
+                            method : 'POST',
+                            url : url,
+                            json : true,
+                        }
+
+                        if(type === 'news') {
+                            options.body = form;
+                        } else {
+                            options.formData = form;
+                        }
+
+
+                        request(options)
                         .then(function(_data){
+                                console.log(_data);
                                 resolve(_data);
                             })
                         })
         });
 }
 
+WeChat.prototype.getMaterialList = function(form){
+        var that = this;
+        form.type = form.type || 'image';
+        form.offset = form.offset || 0;
+        form.count = form.count || 1;
+
+
+        return new Promise(function(resolve,reject){
+                    console.log('getData');
+                    that.fetchAccessToken()
+                    .then(function(data){
+                        //access_token=ACCESS_TOKEN&type=TYPE
+                        var url = api.permanent_material.getMaterialList+"access_token="+data.access_token;
+
+                        var options = {
+                            method : 'POST',
+                            url : url,
+                            json : true,
+                            body : form,
+                        }
+
+
+                        request(options)
+                        .then(function(_data){
+                                console.log(_data);
+                                resolve(_data);
+                            })
+                        })
+        });
+}
 
 WeChat.prototype.reply = function(){
     var content = this.body;

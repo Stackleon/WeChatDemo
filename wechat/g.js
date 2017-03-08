@@ -9,7 +9,6 @@ module.exports = function(opts,handler){
     var wechat = new WeChat(opts);
 
     return function*(next){
-        console.log(this);
         var that = this;
         var token = opts.token;
         var signature = this.query.signature;
@@ -20,7 +19,6 @@ module.exports = function(opts,handler){
         var sha = sha1(arr);
 
 
-        console.log("method:"+this.method);
         if(this.method === 'GET'){
             console.log("echostr:"+sha);
             if(sha === signature){
