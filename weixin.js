@@ -6,8 +6,11 @@ var menu = require('./wechat/menu');
 
 var wechatApi = new WeChat(config.wechat);
 
+//wechatApi.deleteMenu();
+
 wechatApi.queryMenu().then(function(data){
-    if(!data){
+    console.log("query : "+JSON.stringify(data));
+    if(data.errcode === 46003){
         wechatApi.deleteMenu().then(function(data){
         console.log('deleter msg :'+JSON.stringify(data));
         wechatApi.createMenu(menu);
@@ -27,11 +30,18 @@ exports.reply = function* (next){
             if(message.EventKey){
                 console.log('扫描进来:'+JSON.stringify(message.EventKey));
             }
-            this.body = `感谢关注!
+            var reply = {
+                type : 'text',
+                text : ''
+            };
+
+            reply.text = `感谢关注!
     回复1：小惊喜
     回复2：大惊喜
     回复3：超大惊喜
     回复4：试试你就知道了`;
+            this.body = reply;
+
         } else if(message.Event === 'unsubcribe'){
             this.body = {};
             console.log('无情取消关注');
@@ -39,17 +49,19 @@ exports.reply = function* (next){
 
     } else if(message.MsgType === 'text'){
             var sendMsg = message.Content;
-            var content = {};
+            var reply = {};
             console.log('sendMsg:'+sendMsg);
             if(sendMsg === '1'){
-                    content = 'Hello，Guys。 you are very beauty!';
+                    reply.text = 'Hello，Guys。 you are very beauty!';
+                    reply.type = 'text';
             }else if(sendMsg === '2'){
-                    content = `    回复1：小惊喜
+                    reply.text = `    回复1：小惊喜
             回复2：大惊喜
             回复3：超大惊喜
-            回复4：试试你就知道了`;;
+            回复4：试试你就知道了`;
+                    reply.type = 'text';
             }else if(sendMsg === '3'){
-                    content = [
+                    reply = [
                         {title:'技术改变生活',
                         description :'拥抱开源',
                         picUrl:'http://static.oschina.net/uploads/img/201304/17033907_yA2V.jpg',
@@ -59,19 +71,19 @@ exports.reply = function* (next){
             } else if(sendMsg === '4') {
                 var filePath = path.dirname(__dirname)+'/WeChat/material/milkyway.jpg'
                 var upload = yield wechatApi.uploadMaterial(filePath,'image')
-                content.mediaId = upload.media_id;
-                content.type = 'image';
+                reply.mediaId = upload.media_id;
+                reply.type = 'image';
             } else if(sendMsg === '5') {
                 var filePath = path.dirname(__dirname)+'/WeChat/material/funny.mp4';
                 var uploadVideo = yield wechatApi.uploadMaterial(filePath,'video');
-                content.mediaId = uploadVideo.media_id;
-                content.title = "搞笑视频";
-                content.description = '亲，这是个搞笑视频';
-                content.type = 'video';
+                reply.mediaId = uploadVideo.media_id;
+                reply.title = "搞笑视频";
+                reply.description = '亲，这是个搞笑视频';
+                reply.type = 'video';
             } else if( sendMsg === '6') {
                 var filePath = path.dirname(__dirname)+'/WeChat/material/milkyway.jpg'
                 var upload = yield wechatApi.uploadMaterial(filePath,'image',{type:'image'});
-                content = [
+                reply = [
                         {title:'技术改变生活',
                         description :'拥抱开源',
                         picUrl:upload.url,
@@ -88,7 +100,7 @@ exports.reply = function* (next){
             }
             
 
-            this.body = content;
+            this.body = reply;
     }
 }
 
