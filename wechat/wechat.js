@@ -33,6 +33,18 @@ var api = {
         upload_material : prefix + 'material/add_material?',
         getMaterialList : prefix + 'material/batchget_material?',
 
+    },
+    menu :{
+        //https://api.weixin.qq.com/cgi-bin/menu/create?access_token=ACCESS_TOKEN
+
+        //https://api.weixin.qq.com/cgi-bin/menu/delete?access_token=ACCESS_TOKEN
+
+        //https://api.weixin.qq.com/cgi-bin/menu/get?access_token=ACCESS_TOKEN
+
+        create : prefix + 'menu/create?',
+        delete : prefix + 'menu/delete?',
+        query  : prefix + 'menu/get?',
+
     }
 }
 //主要用于票据的检查和更新
@@ -50,6 +62,12 @@ function WeChat(opts){
 }
  
 WeChat.prototype.fetchAccessToken = function(){
+    if(this.isValidAccessToken(this)){
+        console.log('access_token is valid');
+        return Promise.resolve(this);
+    }
+
+
      var that = this;
      return new Promise(function(resolve,reject){
                  that.getAccessToken()
@@ -81,7 +99,6 @@ WeChat.prototype.fetchAccessToken = function(){
 }
 
 WeChat.prototype.isValidAccessToken = function(data){
-    console.log('isValidAccessToken');
         if(!data || !data.access_token || !data.expires_in){
             return false;
         }
@@ -89,6 +106,7 @@ WeChat.prototype.isValidAccessToken = function(data){
         var access_token = data.access_token;
         var expires_in = data.expires_in;
         var now = (new Date().getTime());
+
 
         if(now < expires_in){
             return true;
@@ -213,5 +231,96 @@ WeChat.prototype.reply = function(){
     this.status = 200;
     this.type = 'application/xml';
 }
+
+
+WeChat.prototype.createMenu = function(menu){
+        console.log('createMenu');
+        var that = this;
+        return new Promise(function(resolve,reject){
+                    that.fetchAccessToken()
+                    .then(function(data){
+                        //access_token=ACCESS_TOKEN&type=TYPE
+                        var url = api.menu.create+"access_token="+data.access_token;
+                        console.log(url);
+                        var options = {
+                            method : 'POST',
+                            url : url,
+                            json : true,
+                            body : menu,
+                        }
+
+                        request(options)
+                        .then(function(_data){
+                                if(_data && _data.errcode === '0') {
+                                    console.log(JSON.stringify(_data))
+                                    resolve(_data);
+                                } else {
+                                    reject(new Error(_data))
+                                }
+                            })
+                        })
+                        .catch(function(error){
+                            console.log('Create menu fail，Error :'+error);
+                        })
+        });
+}
+
+
+WeChat.prototype.deleteMenu = function(){
+        console.log('deleteMenu');
+        var that = this;
+        return new Promise(function(resolve,reject){
+                    that.fetchAccessToken()
+                    .then(function(data){
+                        //access_token=ACCESS_TOKEN&type=TYPE
+                        var url = api.menu.delete+"access_token="+data.access_token;
+                        console.log(url);
+                        var options = {
+                            method : 'GET',
+                            url : url,
+                            json : true,
+                        }
+
+                        request(options)
+                        .then(function(_data){
+                                if(_data && _data.errcode === 0) {
+                                    console.log(JSON.stringify(_data))
+                                    resolve(_data);
+                                } else {
+                                    reject(new Error(_data))
+                                }
+                            })
+                        })
+                        .catch(function(error){
+                            console.log('Delete menu fail，Error :'+error);
+                        })
+        });
+}
+
+WeChat.prototype.queryMenu = function(){
+        console.log('queryMenu');
+        var that = this;
+        return new Promise(function(resolve,reject){
+                    that.fetchAccessToken()
+                    .then(function(data){
+                        //access_token=ACCESS_TOKEN&type=TYPE
+                        var url = api.menu.query+"access_token="+data.access_token;
+                        console.log(url);
+                        var options = {
+                            method : 'GET',
+                            url : url,
+                            json : true,
+                        }
+                        request(options)
+                        .then(function(_data){
+                                resolve(_data);
+                            })
+                        })
+                        .catch(function(error){
+                            console.log('query menu fail，Error :'+error);
+                        })
+        });
+}
+
 
 module.exports = WeChat;

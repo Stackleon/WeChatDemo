@@ -2,6 +2,21 @@
 var WeChat = require('./wechat/wechat');
 var config = require('./config');
 var path = require('path');
+var menu = require('./wechat/menu');
+
+var wechatApi = new WeChat(config.wechat);
+
+wechatApi.queryMenu().then(function(data){
+    if(!data){
+        wechatApi.deleteMenu().then(function(data){
+        console.log('deleter msg :'+JSON.stringify(data));
+        wechatApi.createMenu(menu);
+        });
+    }
+})
+
+
+
 
 exports.reply = function* (next){
     var message = this.weixin; // 挂载过的对象
@@ -10,7 +25,7 @@ exports.reply = function* (next){
     if(message.MsgType === 'event'){
         if(message.Event === 'subscribe') {
             if(message.EventKey){
-                console.log('扫描进来:'+message.EventKey +'  '+message.ticket);
+                console.log('扫描进来:'+JSON.stringify(message.EventKey));
             }
             this.body = `感谢关注!
     回复1：小惊喜
@@ -18,12 +33,11 @@ exports.reply = function* (next){
     回复3：超大惊喜
     回复4：试试你就知道了`;
         } else if(message.Event === 'unsubcribe'){
-            this.body = '';
+            this.body = {};
             console.log('无情取消关注');
         }
 
     } else if(message.MsgType === 'text'){
-            var wechatApi = new WeChat(config.wechat);
             var sendMsg = message.Content;
             var content = {};
             console.log('sendMsg:'+sendMsg);
