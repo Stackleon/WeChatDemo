@@ -251,8 +251,8 @@ WeChat.prototype.createMenu = function(menu){
 
                         request(options)
                         .then(function(_data){
+                                console.log(JSON.stringify(_data))
                                 if(_data && _data.errcode === '0') {
-                                    console.log(JSON.stringify(_data))
                                     resolve(_data);
                                 } else {
                                     reject(new Error(_data))
@@ -284,7 +284,6 @@ WeChat.prototype.deleteMenu = function(){
                         request(options)
                         .then(function(_data){
                                 if(_data && _data.errcode === 0) {
-                                    console.log(JSON.stringify(_data))
                                     resolve(_data);
                                 } else {
                                     reject(new Error(_data))
@@ -313,6 +312,7 @@ WeChat.prototype.queryMenu = function(){
                         }
                         request(options)
                         .then(function(_data){
+                                
                                 resolve(_data);
                             })
                         })

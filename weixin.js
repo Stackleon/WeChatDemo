@@ -26,6 +26,7 @@ exports.reply = function* (next){
 
     console.log('mes:'+message);
     if(message.MsgType === 'event'){
+        console.log("--- Current event:"+message.Event);
         if(message.Event === 'subscribe') {
             if(message.EventKey){
                 console.log('扫描进来:'+JSON.stringify(message.EventKey));
@@ -42,7 +43,7 @@ exports.reply = function* (next){
     回复4：试试你就知道了`;
             this.body = reply;
 
-        } else if(message.Event === 'unsubcribe'){
+        } else if(message.Event === 'unsubscribe'){
             this.body = {};
             console.log('无情取消关注');
         }
